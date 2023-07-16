@@ -4,11 +4,10 @@ from tkinter import ttk
 import time
 
 """
-
-Hibernation mode by default. Follow the link below to disable hibernation mode and set the computer in sleep instead. 
-
-https://stackoverflow.com/a/37009921
+Footnotes:
+1) https://stackoverflow.com/a/37009921
 """
+
 
 class TimerGUI(tk.Tk):
     def __init__(self):
@@ -25,12 +24,14 @@ class TimerGUI(tk.Tk):
 
         self.hours_entry = ttk.Entry(self.label_frame, width=5)
         self.hours_entry.grid(row=0, column=1, padx=5, pady=5)
+        self.hours_entry.insert(tk.END, '0')
 
         self.minutes_label = ttk.Label(self.label_frame, text='Minutes:')
         self.minutes_label.grid(row=0, column=2, padx=5, pady=5)
 
         self.minutes_entry = ttk.Entry(self.label_frame, width=5)
         self.minutes_entry.grid(row=0, column=3, padx=5, pady=5)
+        self.minutes_entry.insert(tk.END, '0')
 
         self.button = ttk.Button(self, text='Start')
         self.button['command'] = self.sleep
@@ -38,17 +39,23 @@ class TimerGUI(tk.Tk):
 
     def sleep(self):
         try:
-            hours = int(self.hours_entry.get()) if self.hours_entry.get() else 0
-            minutes = int(self.minutes_entry.get()) if self.minutes_entry.get() else 0
+            hours = int(self.hours_entry.get()) 
+            minutes = int(self.minutes_entry.get())
+            if hours == 0 and minutes == 0:
+                raise ValueError(
+                    "Please set a value greater than zero for hours or minutes.")
         except ValueError as e:
             print(e)
         else:
             total_minutes = (hours * 60) + minutes
             print("Timer started!")
             print(f"{total_minutes} minutes until sleep")
+            print("Terminate terminal to cancel sleep timer.")
             self.iconify()
             time.sleep(60 * total_minutes)
-            os.system("rundll32.exe powrprof.dll,SetSuspendState 0,1,0")
+
+            
+            os.system("Rundll32.exe Powrprof.dll,SetSuspendState Sleep") # Footnote 1
 
 
 def center_window(window):
