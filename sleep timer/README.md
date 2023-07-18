@@ -1,6 +1,6 @@
 # Sleep timer
 
-Additional info on the sleep function:
+Additional info on sleep/hibernation function:
 https://stackoverflow.com/a/37009921
 
 
