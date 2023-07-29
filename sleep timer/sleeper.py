@@ -4,18 +4,22 @@ from tkinter import ttk
 import time
 
 """
-Footnotes:
-1) https://stackoverflow.com/a/37009921
+Resource:
+https://stackoverflow.com/a/37009921
 """
 
 
 class TimerGUI(tk.Tk):
+    WIDTH = 300
+    HEIGHT = 250
+
     def __init__(self):
         super().__init__()
 
         self.title('Sleep timer')
-        self.geometry('300x200')
+        self.geometry(f"{TimerGUI.WIDTH}x{TimerGUI.HEIGHT}")
 
+        # tkinter widgets and placement
         self.label_frame = ttk.LabelFrame(self, text='Sleep timer')
         self.label_frame.pack(padx=10, pady=10)
 
@@ -33,19 +37,33 @@ class TimerGUI(tk.Tk):
         self.minutes_entry.grid(row=0, column=3, padx=5, pady=5)
         self.minutes_entry.insert(tk.END, '0')
 
+        self.radio_var = tk.StringVar()
+        self.radio_var.set('sleep')
+
+        self.radio_frame = ttk.LabelFrame(self, text='Options')
+        self.radio_frame.pack(padx=10, pady=10)
+
+        for mode in ('sleep', 'hibernate', 'shutdown'):
+            self.radio_option = ttk.Radiobutton(
+                self.radio_frame, text=mode.title(), variable=self.radio_var, value=mode)
+            self.radio_option.pack(anchor='w')
+
         self.button = ttk.Button(self, text='Start')
         self.button['command'] = self.sleep
         self.button.pack(pady=10)
 
     def sleep(self):
         try:
-            hours = int(self.hours_entry.get()) 
+            zero_minutes_error = "Please select a time duration of at least 1 minute or more."
+            hours = int(self.hours_entry.get())
             minutes = int(self.minutes_entry.get())
             if hours == 0 and minutes == 0:
-                raise ValueError(
-                    "Please set a value greater than zero for hours or minutes.")
+                raise ValueError(zero_minutes_error)
         except ValueError as e:
-            print(e)
+            if str(e) == zero_minutes_error:
+                print(e)
+            else:
+                print("Invalid input, please try again using only numbers.")
         else:
             total_minutes = (hours * 60) + minutes
             print("Timer started!")
@@ -53,25 +71,40 @@ class TimerGUI(tk.Tk):
             print("Terminate terminal to cancel sleep timer.")
             self.iconify()
             time.sleep(60 * total_minutes)
-
-            
-            os.system("Rundll32.exe Powrprof.dll,SetSuspendState Sleep") # Footnote 1
+            self.destroy()
+            option = self.radio_var.get()
+            if option == 'sleep':
+                os.system("Powercfg -H OFF")
+                os.system("Rundll32.exe Powrprof.dll,SetSuspendState Sleep")
+            elif option == 'hibernate':
+                os.system("Powercfg -H ON")
+                os.system("Rundll32.exe Powrprof.dll,SetSuspendState Hibernate")
+            elif option == 'shutdown':
+                os.system("shutdown /s /t 0")
 
 
 def center_window(window):
-    window_width = 300
-    window_height = 200
-
     screen_width = window.winfo_screenwidth()
     screen_height = window.winfo_screenheight()
 
-    x = (screen_width // 2) - (window_width // 2)
-    y = (screen_height // 2) - (window_height // 2)
+    x = (screen_width // 2) - (window.WIDTH // 2)
+    y = (screen_height // 2) - (window.HEIGHT // 2)
 
-    window.geometry(f"{window_width}x{window_height}+{x}+{y}")
+    window.geometry(f"{window.WIDTH}x{window.HEIGHT}+{x}+{y}")
+
+
+def is_admin():
+    try:
+        # Check if the current process has administrative privileges
+        return ctypes.windll.shell32.IsUserAnAdmin() != 0
+    except:
+        return False
 
 
 if __name__ == "__main__":
+    if is_admin():
+        exit(-1)
+
     app = TimerGUI()
     center_window(app)
     app.mainloop()
