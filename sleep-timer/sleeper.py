@@ -6,6 +6,8 @@ import ctypes
 """
 Resources:
 https://stackoverflow.com/a/37009921
+https://www.reddit.com/r/pythontips/comments/129ec3p/shutdown_pcmac_with_python/
+
 """
 
 #####
