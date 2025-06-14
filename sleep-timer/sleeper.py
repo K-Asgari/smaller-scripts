@@ -13,10 +13,12 @@ https://www.reddit.com/r/pythontips/comments/129ec3p/shutdown_pcmac_with_python/
 #####
 
 """
+- BUG:
+    
 - TODO: 
-    Change admin requirement to disclaimer
+
     Icon tray
-    Autostart at login - optional in setting
+    Autostart at login - optional in settings
     Settings -> Default timer, autostart on login + auto-minimize -> Save settings
     Store last used timer
     Portable
@@ -27,6 +29,9 @@ https://www.reddit.com/r/pythontips/comments/129ec3p/shutdown_pcmac_with_python/
 
 
 class Config:
+    DEBUGGING = True # Bool
+    ONE_SECOND_IN_MS = 1000 # Default: 1000 -> Decrease for faster countdown
+
     SMALL = 5
     MEDIUM = 10
     WIDTH = 300
@@ -67,22 +72,22 @@ class TimerInput(ttk.LabelFrame):
 
 class OptionHandler:
     def execute(option):
-        # ! Debugging, uncomment when done
-        # app.log_message(f"Executing {option}")
+        app.log_message(f"Executing {option}")
+        if Config.DEBUGGING:
+            return
+
         try:
             if option == 'sleep':
-                app.log_message('Sleep option executed')
-                # os.system("Powercfg -H OFF")
-                # os.system("Rundll32.exe Powrprof.dll,SetSuspendState Sleep")
+                os.system("Powercfg -H OFF")
+                os.system("Rundll32.exe Powrprof.dll,SetSuspendState Sleep")
             elif option == 'hibernate':
-                app.log_message('Hibernate option executed')
-                # os.system("Powercfg -H ON")
-                # os.system("Rundll32.exe Powrprof.dll,SetSuspendState Hibernate")
+                os.system("Powercfg -H ON")
+                os.system("Rundll32.exe Powrprof.dll,SetSuspendState Hibernate")
             elif option == 'shutdown':
-                app.log_message('Shutdown option executed')
-                # os.system("shutdown /s /t 0")
+                os.system("shutdown /s /t 0")
         except Exception as e:
             print(f"Error executing {option}: {e}")
+
 
 class OptionFrame(ttk.LabelFrame):
     # ? Make the class smaller?
@@ -129,19 +134,21 @@ class OptionFrame(ttk.LabelFrame):
         # ? Auto minimize?
         # app.iconify()
         total_seconds = self.validate_timer()
+        if total_seconds is None:
+            return
 
         app.replace_widget(
             app.timer_input, app.countdown_timer, app.option_frame)
         app.replace_widget(self.start_button, self.stop_button)
 
         option = self.radio_var.get()
-        if total_seconds > 0:
+        if total_seconds > 0:  # ! Bug - total_seconds is None in some cases.
             app.countdown_timer.start(total_seconds)
             app.log_message(
                 f"The system will {option} when the timer reaches zero.")
         else:
             OptionHandler.execute(option=option)
-            # ! Disabled for debugging
+            #! Disabled for debugging
             # app.destroy()
 
     def stop_button_command(self) -> None:
@@ -167,7 +174,7 @@ class CountdownTimer(ttk.LabelFrame):
         self.remaining_seconds = total_seconds
         self.is_running = True
         self.update_display()
-        self.master.after(1000, self.update)
+        self.master.after(Config.ONE_SECOND_IN_MS, self.update)
 
     def stop(self):
         self.is_running = False
@@ -185,13 +192,12 @@ class CountdownTimer(ttk.LabelFrame):
         if self.is_running and self.remaining_seconds > 0:
             self.remaining_seconds -= 1
             self.update_display()
-            self.master.after(1000, self.update)
+            self.master.after(Config.ONE_SECOND_IN_MS, self.update)
         elif self.is_running:
             self.finish()
 
     def finish(self):
         self.is_running = False
-        # ? Move execution here?
         option = app.option_frame.radio_var.get()
         OptionHandler.execute(option)
         app.log_message(f"Executed option: {option}")
@@ -219,8 +225,8 @@ class App(tk.Tk):
 
         self.center_window(self)
 
-    #! For debugging purposes
     def log_message(self, msg):
+        #! For debugging purposes - it's now a feature.
         if not hasattr(self, 'log_label'):
             self.log_label = tk.Label(self, text="", fg="red", wraplength=300)
             self.log_label.pack(pady=5)
@@ -252,16 +258,31 @@ def is_admin() -> bool:
         return False
 
 
+def no_admin_disclaimer() -> None:
+    messagebox.showinfo(
+        title="Info",
+        message="Admin privileges not detected. Some features may not work as expected."
+    )
+
+
+def debugging_message():
+    messagebox.showinfo(
+        title="Info",
+        message="Debugging enabled, execution features disabled."
+    )
+
+
 def hide_terminal() -> None:
     hwnd = ctypes.windll.kernel32.GetConsoleWindow()
     ctypes.windll.user32.ShowWindow(hwnd, 0)
 
 
 if __name__ == "__main__":
-    # if not is_admin():
-    #     messagebox.showerror("Admin Rights Required", "This app must be run as Administrator.")
-    #     input("Press Enter to close")
-    #     exit(-1)
+    if Config.DEBUGGING:
+        debugging_message()
+    elif is_admin():
+        no_admin_disclaimer()
 
     app = App()
+    app.focus_force()
     app.mainloop()
