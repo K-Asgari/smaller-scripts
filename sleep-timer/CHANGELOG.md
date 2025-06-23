@@ -14,11 +14,11 @@ v1.0 14/06/25
     Change admin requirement to disclaimer - DONE
     Add debugger mode - DONE
 
-    Icon tray
-    Autostart at login - optional in settings
-    Settings -> Default timer, autostart on login + auto-minimize -> Save settings
-    Store last used timer
-    Portable
-    Cross platform?
-    Packing/build
+    - Icon tray
+    - Autostart at login - optional in settings
+    - Settings -> Default timer, autostart on login + auto-minimize -> Save settings
+    - Store last used timer
+    - Portable
+    - Cross platform?
+    - Packing/build
 
