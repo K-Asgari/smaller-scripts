@@ -11,8 +11,8 @@ v1.0 14/06/25
     Immediate start, then cancel should not show timer. - DONE
 
 - TODO: 
-    Change admin requirement to disclaimer - DONE
-    Add debugger mode - DONE
+    - Change admin requirement to disclaimer - DONE
+    - Add debugger mode - DONE
 
     - Icon tray
     - Autostart at login - optional in settings
