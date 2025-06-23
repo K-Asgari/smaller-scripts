@@ -2,6 +2,10 @@
 
 
 
+v1.1 23/06/25
+
+No known bugs. Stable version. Radio buttons disabled when when timer is running. 
+
 v1.0 14/06/25
 - BUG:
     Immediate start, then cancel should not show timer. - DONE
