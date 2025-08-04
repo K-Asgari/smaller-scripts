@@ -20,6 +20,10 @@
 
 # Changelog
 
+**v1.2.1 05/08/25**
+
+Changing file structure. Project becoming it's own repo. 
+
 **v1.2 04/08/25**
 
 Added Tray icon feature. TODO list added to table.
