@@ -1,6 +1,7 @@
 import os
 import tkinter as tk
 from tkinter import ttk, messagebox
+from tray_icon import TrayIcon
 
 import system_utils
 
@@ -42,6 +43,12 @@ class App(tk.Tk):
         self.option_frame.pack()
 
         self.center_window(self)
+
+        self.tray = TrayIcon(self, icon_path="sleeper-icon.ico")
+        self.tray.start()
+        self.protocol("WM_DELETE_WINDOW", self.withdraw)
+
+
 
     def log_message(self, msg):
         # ! For debugging purposes - it's now a feature.
